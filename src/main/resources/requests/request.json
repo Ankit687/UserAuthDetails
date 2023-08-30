@@ -1,0 +1,33 @@
+curl --location 'localhost:8080/saveNewUser' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: JSESSIONID=D7A25AEE73C51663E8D8C39CA2644985' \
+--data '{
+"name" : "ankit",
+"password" : "0000",
+"email" : "ankit@gmail.com",
+"roles" : "ROLE_ADMIN"
+}'
+
+curl --location 'localhost:8080/authenticate' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: JSESSIONID=D7A25AEE73C51663E8D8C39CA2644985' \
+--data '{
+"username" : "ankit",
+"password" : "0000"
+}'
+
+
+curl --location 'localhost:8080/refreshToken' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: JSESSIONID=D7A25AEE73C51663E8D8C39CA2644985' \
+--data '{
+"token": "98cb8278-3042-4fc7-85dd-2ee696f28079"
+}'
+
+curl --location 'localhost:8080/hello' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbmtpdCIsImlhdCI6MTY5MzQxMDEyNSwiZXhwIjoxNjkzNDEwMjQ1fQ.CGZ4MgAlcjqfGkdCWdrry_8-x1y--aphcfJFHIfNU0Y' \
+--header 'Cookie: JSESSIONID=D7A25AEE73C51663E8D8C39CA2644985'
+
+curl --location 'localhost:8080/get/1' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaXZ5YSIsImlhdCI6MTY5MzQxMDMyMywiZXhwIjoxNjkzNDEwNDQzfQ.0vmXB4M8XunGScHkfH0NFIK2BZijeAMv13j6j6vKYEw' \
+--header 'Cookie: JSESSIONID=D7A25AEE73C51663E8D8C39CA2644985'

@@ -57,7 +57,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "/saveNewUser", "/authenticate").permitAll()
+                        .requestMatchers("/", "/saveNewUser", "/authenticate", "/refreshToken").permitAll()
                         .requestMatchers("/hello", "/get/**").authenticated())
                 .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

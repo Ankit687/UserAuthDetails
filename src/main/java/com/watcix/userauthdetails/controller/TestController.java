@@ -1,7 +1,11 @@
 package com.watcix.userauthdetails.controller;
 
 import com.watcix.userauthdetails.dto.AuthRequest;
+import com.watcix.userauthdetails.dto.JwtResponse;
+import com.watcix.userauthdetails.dto.RefreshTokenRequest;
+import com.watcix.userauthdetails.entity.RefreshToken;
 import com.watcix.userauthdetails.service.JwtService;
+import com.watcix.userauthdetails.service.RefreshTokenService;
 import com.watcix.userauthdetails.service.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +22,9 @@ public class TestController {
 
     @Autowired
     private UserInfoService userInfoService;
+
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
     @GetMapping("/")
     public ResponseEntity<String> getHomePage() {
@@ -37,13 +44,34 @@ public class TestController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<String> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         try {
-            if (userInfoService.authenticateUser(authRequest.getUsername(), authRequest.getPassword()))
-                return new ResponseEntity<>(jwtService.generateToken(authRequest.getUsername()), HttpStatus.OK);
+            if (userInfoService.authenticateUser(authRequest.getUsername(), authRequest.getPassword())) {
+                String generatedToken = jwtService.generateToken(authRequest.getUsername());
+                RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.getUsername());
+                JwtResponse jwtResponse = JwtResponse.builder()
+                        .withAccessToken(generatedToken)
+                        .withToken(refreshToken.getToken())
+                        .build();
+                return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
+            }
         } catch (UsernameNotFoundException e) {
             System.out.println(e);
         }
         return new ResponseEntity<>("Invalid user request", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @PostMapping("/refreshToken")
+    public JwtResponse refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        return refreshTokenService.findByToken(refreshTokenRequest.getToken())
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUserInfo)
+                .map(userInfo -> {
+                    String generatedToken = jwtService.generateToken(userInfo.getName());
+                    return JwtResponse.builder()
+                            .withAccessToken(generatedToken)
+                            .withToken(refreshTokenRequest.getToken())
+                            .build();
+                }).orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
     }
 }
